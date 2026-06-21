@@ -93,7 +93,7 @@ func BenchmarkListJobs(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				_ = s.ListJobs(nil, 0)
+				_, _ = s.ListJobs(nil, 0)
 			}
 		})
 	}
@@ -108,7 +108,7 @@ func BenchmarkGetTask(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = s.GetTask("task-bench-task-10")
+		_, _ = s.GetTask("task-bench-task-10")
 	}
 }
 
@@ -174,7 +174,7 @@ func BenchmarkListWorkers(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				_ = s.ListWorkers()
+				_, _ = s.ListWorkers()
 			}
 		})
 	}
