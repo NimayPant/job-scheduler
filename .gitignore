@@ -1,0 +1,10 @@
+bin/
+*.exe
+*.test
+*.prof
+data/
+*.db
+.DS_Store
+.vscode/
+.idea/
+.vscode/settings.json

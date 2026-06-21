@@ -1,0 +1,255 @@
+syntax = "proto3";
+
+package scheduler;
+
+option go_package = "github.com/NimayPant/job-scheduler/pkg/pb;schedulerpb";
+
+import "google/protobuf/timestamp.proto";
+
+// Core Enums
+
+enum JobState {
+  JOB_STATE_UNSPECIFIED = 0;
+  JOB_STATE_PENDING     = 1;
+  JOB_STATE_QUEUED      = 2;
+  JOB_STATE_RUNNING     = 3;
+  JOB_STATE_COMPLETED   = 4;
+  JOB_STATE_FAILED      = 5;
+  JOB_STATE_CANCELLED   = 6;
+  JOB_STATE_RETRYING    = 7;
+}
+
+enum TaskState {
+  TASK_STATE_UNSPECIFIED = 0;
+  TASK_STATE_PENDING     = 1;
+  TASK_STATE_QUEUED      = 2;
+  TASK_STATE_RUNNING     = 3;
+  TASK_STATE_COMPLETED   = 4;
+  TASK_STATE_FAILED      = 5;
+  TASK_STATE_CANCELLED   = 6;
+  TASK_STATE_RETRYING    = 7;
+}
+
+enum WorkerState {
+  WORKER_STATE_UNSPECIFIED = 0;
+  WORKER_STATE_ACTIVE      = 1;
+  WORKER_STATE_DRAINING    = 2;
+  WORKER_STATE_DEAD        = 3;
+}
+
+// Resource Messages
+
+message ResourceRequirements {
+  int32 cpu_cores  = 1;
+  int64 memory_mb  = 2;
+  int32 gpus       = 3;
+  int64 disk_mb    = 4;
+}
+
+message ResourceCapacity {
+  ResourceRequirements total     = 1;
+  ResourceRequirements available = 2;
+}
+
+// Retry Policy
+
+message RetryPolicy {
+  int32 max_retries        = 1;
+  int64 initial_backoff_ms = 2;
+  int64 max_backoff_ms     = 3;
+  double backoff_multiplier = 4;
+}
+
+// Task
+
+message Task {
+  string id              = 1;
+  string job_id          = 2;
+  string name            = 3;
+  string command         = 4;
+  repeated string args   = 5;
+  TaskState state        = 6;
+  string assigned_worker = 7;
+  int32 attempt          = 8;
+  int32 max_retries      = 9;
+  ResourceRequirements resource_requirements = 10;
+  repeated string dependencies = 11;
+  google.protobuf.Timestamp created_at  = 12;
+  google.protobuf.Timestamp updated_at  = 13;
+  string stdout          = 14;
+  string stderr          = 15;
+  int32 exit_code        = 16;
+  string error_message   = 17;
+}
+
+// Job
+
+message Job {
+  string id            = 1;
+  string name          = 2;
+  int32 priority       = 3;
+  repeated Task tasks  = 4;
+  JobState state       = 5;
+  RetryPolicy retry_policy = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  string error_message = 9;
+}
+
+// DAG
+
+message DAGEdge {
+  string from_task = 1;
+  string to_task   = 2;
+}
+
+message DAGDefinition {
+  string id              = 1;
+  string name            = 2;
+  int32 priority         = 3;
+  repeated Task tasks    = 4;
+  repeated DAGEdge edges = 5;
+  RetryPolicy retry_policy = 6;
+}
+
+// Worker Info
+
+message WorkerInfo {
+  string id             = 1;
+  string address        = 2;
+  WorkerState state     = 3;
+  ResourceCapacity resources = 4;
+  repeated string running_task_ids = 5;
+  google.protobuf.Timestamp last_heartbeat = 6;
+}
+
+// Scheduler Service (Client -> Scheduler)
+
+service SchedulerService {
+  rpc SubmitJob(SubmitJobRequest) returns (SubmitJobResponse);
+  rpc SubmitDAG(SubmitDAGRequest) returns (SubmitDAGResponse);
+  rpc GetJobStatus(GetJobStatusRequest) returns (GetJobStatusResponse);
+  rpc CancelJob(CancelJobRequest) returns (CancelJobResponse);
+  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse);
+  rpc ListWorkers(ListWorkersRequest) returns (ListWorkersResponse);
+}
+
+message SubmitJobRequest {
+  string name            = 1;
+  int32 priority         = 2;
+  repeated Task tasks    = 3;
+  RetryPolicy retry_policy = 4;
+}
+
+message SubmitJobResponse {
+  string job_id = 1;
+}
+
+message SubmitDAGRequest {
+  DAGDefinition dag = 1;
+}
+
+message SubmitDAGResponse {
+  string dag_id = 1;
+  string job_id = 2;
+}
+
+message GetJobStatusRequest {
+  string job_id = 1;
+}
+
+message GetJobStatusResponse {
+  Job job = 1;
+}
+
+message CancelJobRequest {
+  string job_id = 1;
+}
+
+message CancelJobResponse {
+  bool success = 1;
+}
+
+message ListJobsRequest {
+  JobState filter_state = 1;
+  int32 limit           = 2;
+}
+
+message ListJobsResponse {
+  repeated Job jobs = 1;
+}
+
+message ListWorkersRequest {}
+
+message ListWorkersResponse {
+  repeated WorkerInfo workers = 1;
+}
+
+// Coordination Service (Worker -> Scheduler)
+
+service CoordinationService {
+  rpc RegisterWorker(RegisterWorkerRequest) returns (RegisterWorkerResponse);
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  rpc ReportTaskStatus(ReportTaskStatusRequest) returns (ReportTaskStatusResponse);
+}
+
+message RegisterWorkerRequest {
+  string worker_id    = 1;
+  string address      = 2;
+  ResourceCapacity resources = 3;
+}
+
+message RegisterWorkerResponse {
+  bool accepted       = 1;
+  string leader_address = 2;
+}
+
+message HeartbeatRequest {
+  string worker_id         = 1;
+  ResourceCapacity resources = 2;
+  repeated string running_task_ids = 3;
+}
+
+message HeartbeatResponse {
+  bool acknowledged = 1;
+  repeated string cancel_task_ids = 2;
+}
+
+message ReportTaskStatusRequest {
+  string worker_id   = 1;
+  string task_id     = 2;
+  string job_id      = 3;
+  TaskState state    = 4;
+  int32 exit_code    = 5;
+  string stdout      = 6;
+  string stderr      = 7;
+  string error_message = 8;
+}
+
+message ReportTaskStatusResponse {
+  bool acknowledged = 1;
+}
+
+// Worker Service (Scheduler -> Worker)
+
+service WorkerService {
+  rpc AssignTask(AssignTaskRequest) returns (AssignTaskResponse);
+  rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse);
+}
+
+message AssignTaskRequest {
+  Task task = 1;
+}
+
+message AssignTaskResponse {
+  bool accepted = 1;
+  string reason = 2;
+}
+
+message CancelTaskRequest {
+  string task_id = 1;
+}
+
+message CancelTaskResponse {
+  bool success = 1;
+}

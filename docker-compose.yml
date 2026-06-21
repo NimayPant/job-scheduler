@@ -1,0 +1,26 @@
+services:
+  # Single bootstrap node
+  scheduler-0:
+    build: .
+    image: jobscheduler:latest
+    container_name: scheduler-0
+    command: ["./scheduler", "--bootstrap", "--id", "node-0", "--raft-addr", "scheduler-0:7000", "--grpc-addr", "0.0.0.0:8000"]
+    volumes:
+      - ./data/node-0:/app/data/node-0
+    ports:
+      - "8000:8000" # gRPC API
+      - "7000:7000" # Raft
+
+  # Worker node
+  worker-0:
+    image: jobscheduler:latest
+    container_name: worker-0
+    command: ["./worker", "--id", "worker-0", "--scheduler", "scheduler-0:8000", "--grpc-addr", "0.0.0.0:9000"]
+    depends_on:
+      - scheduler-0
+    volumes:
+      - ./data/worker-0:/app/data/worker-0
+
+networks:
+  default:
+    name: jobscheduler-net
