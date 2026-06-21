@@ -78,7 +78,7 @@ func BenchmarkAllocateReleaseCycle(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		cap := NewResourceCapacity(total)
 		for j := 0; j < 8; j++ {
-			cap.Allocate(req)
+			_ = cap.Allocate(req)
 		}
 		for j := 0; j < 8; j++ {
 			cap.Release(req)
@@ -118,7 +118,7 @@ func BenchmarkJobValidation(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				job.Validate()
+				_ = job.Validate()
 			}
 		})
 	}

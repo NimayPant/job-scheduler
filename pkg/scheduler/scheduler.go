@@ -138,7 +138,7 @@ func (s *Scheduler) scheduleTick() {
 		if s.taskDispatcher != nil {
 			if err := s.taskDispatcher.DispatchTask(worker.Address, task); err != nil {
 				log.Printf("failed to dispatch task %s to worker %s: %v", task.ID, worker.ID, err)
-				s.node.ApplyCommand(raft.CmdUpdateTaskState, raft.UpdateTaskStatePayload{
+				_ = s.node.ApplyCommand(raft.CmdUpdateTaskState, raft.UpdateTaskStatePayload{
 					TaskID: task.ID,
 					JobID:  task.JobID,
 					State:  models.TaskStateQueued,
@@ -147,7 +147,7 @@ func (s *Scheduler) scheduleTick() {
 			}
 		}
 
-		worker.Resources.Allocate(task.ResourceReqs)
+		_ = worker.Resources.Allocate(task.ResourceReqs)
 		worker.RunningTaskIDs = append(worker.RunningTaskIDs, task.ID)
 	}
 }
@@ -180,7 +180,7 @@ func (s *Scheduler) checkWorkerHealth() {
 		if now.Sub(w.LastHeartbeat) > heartbeatTimeout {
 			log.Printf("worker %s missed heartbeat, marking as dead", w.ID)
 
-			s.node.ApplyCommand(raft.CmdRemoveWorker, raft.RemoveWorkerPayload{
+			_ = s.node.ApplyCommand(raft.CmdRemoveWorker, raft.RemoveWorkerPayload{
 				WorkerID: w.ID,
 			})
 
@@ -201,7 +201,7 @@ func (s *Scheduler) requeueWorkerTasks(worker *store.WorkerRecord) {
 
 		if task.Attempt >= task.MaxRetries {
 			log.Printf("task %s exhausted retries (%d/%d), marking failed", task.ID, task.Attempt, task.MaxRetries)
-			s.node.ApplyCommand(raft.CmdUpdateTaskState, raft.UpdateTaskStatePayload{
+			_ = s.node.ApplyCommand(raft.CmdUpdateTaskState, raft.UpdateTaskStatePayload{
 				TaskID:       task.ID,
 				JobID:        task.JobID,
 				State:        models.TaskStateFailed,
@@ -211,7 +211,7 @@ func (s *Scheduler) requeueWorkerTasks(worker *store.WorkerRecord) {
 		}
 
 		log.Printf("requeuing task %s from dead worker %s (attempt %d)", task.ID, worker.ID, task.Attempt+1)
-		s.node.ApplyCommand(raft.CmdUpdateTaskState, raft.UpdateTaskStatePayload{
+		_ = s.node.ApplyCommand(raft.CmdUpdateTaskState, raft.UpdateTaskStatePayload{
 			TaskID: task.ID,
 			JobID:  task.JobID,
 			State:  models.TaskStateQueued,
@@ -233,7 +233,7 @@ func (s *Scheduler) HandleTaskCompletion(taskID, jobID string, state models.Task
 		if state == models.TaskStateFailed {
 			cancelled := executor.PropagateFailure(taskID)
 			for _, cid := range cancelled {
-				s.node.ApplyCommand(raft.CmdUpdateTaskState, raft.UpdateTaskStatePayload{
+				_ = s.node.ApplyCommand(raft.CmdUpdateTaskState, raft.UpdateTaskStatePayload{
 					TaskID:       cid,
 					JobID:        jobID,
 					State:        models.TaskStateCancelled,

@@ -6,12 +6,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
-# Cancel in-progress runs for the same PR/branch to save CI minutes
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Principle of least privilege: strictly limit the GITHUB_TOKEN's access
 permissions:
   contents: read
   pull-requests: read
@@ -25,7 +23,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1 # Shallow clone for speed
+          fetch-depth: 1
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -45,9 +43,7 @@ jobs:
           args: --timeout=5m
 
       - name: Run Deadcode Analysis
-        run: |
-          # Install and run deadcode analysis to prevent orphaned functions
-          go run golang.org/x/tools/cmd/deadcode@latest ./...
+        run: go run golang.org/x/tools/cmd/deadcode@latest ./...
 
       - name: Run Unit Tests with Race Detector
         run: go test -v -race -count=1 ./...

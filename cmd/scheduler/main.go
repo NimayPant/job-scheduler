@@ -78,6 +78,6 @@ func main() {
 
 	log.Println("shutting down...")
 	grpcServer.GracefulStop()
-	raftNode.Shutdown()
+	_ = raftNode.Shutdown()
 	log.Println("shutdown complete")
 }

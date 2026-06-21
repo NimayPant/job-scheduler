@@ -87,7 +87,7 @@ func BenchmarkSelectWorker(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				placer.SelectWorker(task, workers)
+				_, _, _ = placer.SelectWorker(task, workers)
 			}
 		})
 		b.Run(fmt.Sprintf("workers-%d/spread", workerCount), func(b *testing.B) {
@@ -97,7 +97,7 @@ func BenchmarkSelectWorker(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				placer.SelectWorker(task, workers)
+				_, _, _ = placer.SelectWorker(task, workers)
 			}
 		})
 	}

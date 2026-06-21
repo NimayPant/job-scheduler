@@ -21,7 +21,7 @@ func BenchmarkLimitedWriter(b *testing.B) {
 			var buf bytes.Buffer
 			w := &limitedWriter{buf: &buf, max: 500}
 			for j := 0; j < 100; j++ {
-				w.Write(data)
+				_, _ = w.Write(data)
 			}
 		}
 	})
@@ -31,7 +31,7 @@ func BenchmarkLimitedWriter(b *testing.B) {
 			var buf bytes.Buffer
 			w := &limitedWriter{buf: &buf, max: 64}
 			for j := 0; j < 1000; j++ {
-				w.Write(data)
+				_, _ = w.Write(data)
 			}
 		}
 	})

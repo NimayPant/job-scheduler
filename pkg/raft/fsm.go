@@ -431,10 +431,10 @@ func (f *FSM) Restore(rc io.ReadCloser) error {
 			f.store.SaveJob(j)
 		}
 		for _, w := range f.workers {
-			f.store.SaveWorker(w)
+			_ = f.store.SaveWorker(w)
 		}
 		for _, d := range f.dags {
-			f.store.SaveDAG(d)
+			_ = f.store.SaveDAG(d)
 		}
 	}
 

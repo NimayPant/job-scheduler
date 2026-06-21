@@ -73,7 +73,7 @@ func cmdSubmit(ctx context.Context, client schedulerpb.SchedulerServiceClient, a
 	retries := fs.Int("retries", 3, "Max retries per task")
 	cpus := fs.Int("cpus", 1, "CPU cores required")
 	memMB := fs.Int64("mem", 256, "Memory MB required")
-	fs.Parse(args)
+	_ = fs.Parse(args)
 
 	if *name == "" || *cmd == "" {
 		fmt.Fprintln(os.Stderr, "error: --name and --cmd are required")
@@ -119,7 +119,7 @@ func cmdSubmit(ctx context.Context, client schedulerpb.SchedulerServiceClient, a
 func cmdStatus(ctx context.Context, client schedulerpb.SchedulerServiceClient, args []string) {
 	fs := flag.NewFlagSet("status", flag.ExitOnError)
 	jobID := fs.String("job-id", "", "Job ID")
-	fs.Parse(args)
+	_ = fs.Parse(args)
 
 	if *jobID == "" {
 		fmt.Fprintln(os.Stderr, "error: --job-id is required")
@@ -138,7 +138,7 @@ func cmdStatus(ctx context.Context, client schedulerpb.SchedulerServiceClient, a
 func cmdCancel(ctx context.Context, client schedulerpb.SchedulerServiceClient, args []string) {
 	fs := flag.NewFlagSet("cancel", flag.ExitOnError)
 	jobID := fs.String("job-id", "", "Job ID")
-	fs.Parse(args)
+	_ = fs.Parse(args)
 
 	if *jobID == "" {
 		fmt.Fprintln(os.Stderr, "error: --job-id is required")
@@ -155,7 +155,7 @@ func cmdCancel(ctx context.Context, client schedulerpb.SchedulerServiceClient, a
 func cmdList(ctx context.Context, client schedulerpb.SchedulerServiceClient, args []string) {
 	fs := flag.NewFlagSet("list", flag.ExitOnError)
 	limit := fs.Int("limit", 20, "Max results")
-	fs.Parse(args)
+	_ = fs.Parse(args)
 
 	resp, err := client.ListJobs(ctx, &schedulerpb.ListJobsRequest{Limit: int32(*limit)})
 	if err != nil {

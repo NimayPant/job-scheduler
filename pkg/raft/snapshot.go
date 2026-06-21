@@ -13,7 +13,7 @@ type FSMSnapshot struct {
 func (s *FSMSnapshot) Persist(sink hraft.SnapshotSink) error {
 	err := json.NewEncoder(sink).Encode(s.state)
 	if err != nil {
-		sink.Cancel()
+		_ = sink.Cancel()
 		return err
 	}
 	return sink.Close()

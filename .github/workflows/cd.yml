@@ -3,17 +3,15 @@ name: CD
 on:
   push:
     tags:
-      - 'v*' # Trigger strictly on semantic version tags
+      - 'v*'
 
-# Ensure only one deployment runs at a time
 concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: false
 
-# Strictly limit permissions for deployment operations
 permissions:
   contents: read
-  packages: write # Required to publish to ghcr.io
+  packages: write
 
 jobs:
   publish-docker:
