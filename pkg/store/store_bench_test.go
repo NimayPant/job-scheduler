@@ -88,12 +88,12 @@ func BenchmarkListJobs(b *testing.B) {
 			defer cleanup()
 
 			for i := 0; i < jobCount; i++ {
-				s.SaveJob(makeJob(fmt.Sprintf("job-%d", i), 5))
+				_ = s.SaveJob(makeJob(fmt.Sprintf("job-%d", i), 5))
 			}
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				s.ListJobs(nil, 0)
+				_ = s.ListJobs(nil, 0)
 			}
 		})
 	}
@@ -104,11 +104,11 @@ func BenchmarkGetTask(b *testing.B) {
 	defer cleanup()
 
 	job := makeJob("task-bench", 20)
-	s.SaveJob(job)
+	_ = s.SaveJob(job)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		s.GetTask("task-bench-task-10")
+		_ = s.GetTask("task-bench-task-10")
 	}
 }
 
@@ -117,7 +117,7 @@ func BenchmarkUpdateTask(b *testing.B) {
 	defer cleanup()
 
 	job := makeJob("update-bench", 1)
-	s.SaveJob(job)
+	_ = s.SaveJob(job)
 
 	task := job.Tasks[0]
 
@@ -160,7 +160,7 @@ func BenchmarkListWorkers(b *testing.B) {
 			defer cleanup()
 
 			for i := 0; i < count; i++ {
-				s.SaveWorker(&WorkerRecord{
+				_ = s.SaveWorker(&WorkerRecord{
 					ID:      fmt.Sprintf("w-%d", i),
 					Address: fmt.Sprintf("10.0.0.%d:9090", i%255),
 					State:   models.WorkerStateActive,
@@ -174,7 +174,7 @@ func BenchmarkListWorkers(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				s.ListWorkers()
+				_ = s.ListWorkers()
 			}
 		})
 	}
@@ -187,8 +187,8 @@ func BenchmarkDeleteJob(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		id := fmt.Sprintf("del-%d", i)
-		s.SaveJob(makeJob(id, 5))
-		s.DeleteJob(id)
+		_ = s.SaveJob(makeJob(id, 5))
+		_ = s.DeleteJob(id)
 	}
 }
 

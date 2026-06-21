@@ -12,7 +12,7 @@ func BenchmarkLimitedWriter(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			var buf bytes.Buffer
 			w := &limitedWriter{buf: &buf, max: 1024 * 1024}
-			w.Write(data)
+			_, _ = w.Write(data)
 		}
 	})
 
@@ -46,7 +46,7 @@ func BenchmarkLimitedWriterSmallChunks(b *testing.B) {
 
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			w.Write(chunk)
+			_, _ = w.Write(chunk)
 		}
 	})
 }

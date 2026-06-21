@@ -260,7 +260,7 @@ func (f *FSM) applyRemoveWorker(data json.RawMessage) interface{} {
 		w.State = models.WorkerStateDead
 	}
 	if f.store != nil {
-		f.store.DeleteWorker(p.WorkerID)
+		_ = f.store.DeleteWorker(p.WorkerID)
 	}
 	return nil
 }
@@ -286,7 +286,7 @@ func (f *FSM) applyCancelJob(data json.RawMessage) interface{} {
 		}
 	}
 	if f.store != nil {
-		f.store.SaveJob(job)
+		_ = f.store.SaveJob(job)
 	}
 	return nil
 }
@@ -306,8 +306,8 @@ func (f *FSM) applySubmitDAG(data json.RawMessage) interface{} {
 	}
 
 	if f.store != nil {
-		f.store.SaveDAG(p.DAG)
-		f.store.SaveJob(p.Job)
+		_ = f.store.SaveDAG(p.DAG)
+		_ = f.store.SaveJob(p.Job)
 	}
 	return nil
 }
@@ -428,7 +428,7 @@ func (f *FSM) Restore(rc io.ReadCloser) error {
 
 	if f.store != nil {
 		for _, j := range f.jobs {
-			f.store.SaveJob(j)
+			_ = f.store.SaveJob(j)
 		}
 		for _, w := range f.workers {
 			_ = f.store.SaveWorker(w)

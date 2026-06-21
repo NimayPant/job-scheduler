@@ -37,7 +37,7 @@ func BenchmarkResourceAllocate(b *testing.B) {
 			CPUCores: 32,
 			MemoryMB: 65536,
 		})
-		cap.Allocate(req)
+		_ = cap.Allocate(req)
 	}
 }
 
@@ -55,7 +55,7 @@ func BenchmarkResourceRelease(b *testing.B) {
 			MemoryMB: 65536,
 			GPUs:     4,
 		})
-		cap.Allocate(req)
+		_ = cap.Allocate(req)
 		cap.Release(req)
 	}
 }
@@ -92,7 +92,7 @@ func BenchmarkUtilizationPercent(b *testing.B) {
 		MemoryMB: 65536,
 	}
 	cap := NewResourceCapacity(total)
-	cap.Allocate(ResourceRequirements{CPUCores: 20, MemoryMB: 40000})
+	_ = cap.Allocate(ResourceRequirements{CPUCores: 20, MemoryMB: 40000})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

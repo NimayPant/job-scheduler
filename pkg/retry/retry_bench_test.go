@@ -75,7 +75,7 @@ func BenchmarkDoImmediateSuccess(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Do(ctx, cfg, func(ctx context.Context, attempt int) error {
+		_ = Do(ctx, cfg, func(ctx context.Context, attempt int) error {
 			return nil
 		})
 	}
@@ -94,7 +94,7 @@ func BenchmarkDoPermanentFailure(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Do(ctx, cfg, func(ctx context.Context, attempt int) error {
+		_ = Do(ctx, cfg, func(ctx context.Context, attempt int) error {
 			return permErr
 		})
 	}
@@ -113,7 +113,7 @@ func BenchmarkDoRetryThenSucceed(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Do(ctx, cfg, func(ctx context.Context, attempt int) error {
+		_ = Do(ctx, cfg, func(ctx context.Context, attempt int) error {
 			if attempt < 2 {
 				return transientErr
 			}
