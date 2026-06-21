@@ -70,7 +70,7 @@ func BenchmarkValidateDAG(b *testing.B) {
 		dag := buildDAG(tc.tasks, tc.style)
 		b.Run(fmt.Sprintf("%s-%d", tc.style, tc.tasks), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				ValidateDAG(dag)
+				_ = ValidateDAG(dag)
 			}
 		})
 	}
@@ -90,7 +90,7 @@ func BenchmarkTopologicalSort(b *testing.B) {
 		dag := buildDAG(tc.tasks, tc.style)
 		b.Run(fmt.Sprintf("%s-%d", tc.style, tc.tasks), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				TopologicalSort(dag)
+				_, _ = TopologicalSort(dag)
 			}
 		})
 	}
